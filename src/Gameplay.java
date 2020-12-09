@@ -58,13 +58,13 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 	private int boardCols = 10;
 	
 	//Logo
-	private final ImageIcon logo = new ImageIcon("src/logo/tetris-logo.png");
+	private final ImageIcon logo = new ImageIcon("src/images/tetris-logo.png");
 	int scaledWidth = Math.toIntExact(Math.round(logo.getIconWidth()/1.17))-1;
 	int scaledHeight = Math.toIntExact(Math.round(logo.getIconHeight()/1.17));
 	private final ImageIcon scaledLogo = new ImageIcon(logo.getImage().getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH));
 
 	//Background
-	private final ImageIcon bg = new ImageIcon("src/logo/bg.png");
+	private final ImageIcon bg = new ImageIcon("src/images/bg.png");
 	int scaledBgWidth = Math.toIntExact(Math.round(bg.getIconWidth()*1.22));
 	int scaledBgHeight = Math.toIntExact(Math.round(bg.getIconHeight()*1.22));
 	private final ImageIcon scaledBg = new ImageIcon(bg.getImage().getScaledInstance(scaledBgWidth, scaledBgHeight, Image.SCALE_SMOOTH));
@@ -121,18 +121,18 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 	}
 	
 	private BlockBox putOnHold(BlockBox bb) {
-		
-		switch(bb.blockType) {
-		case 'I': return new IBlock(BlockRole.HOLD);
-		case 'O': return new OBlock(BlockRole.HOLD);
-		case 'J': return new JBlock(BlockRole.HOLD);
-		case 'L': return new LBlock(BlockRole.HOLD);
-		case 'S': return new SBlock(BlockRole.HOLD);
-		case 'Z': return new ZBlock(BlockRole.HOLD);
-		case 'T': return new TBlock(BlockRole.HOLD);
-		}
-		
-		return null;
+
+		return switch (bb.blockType) {
+			case 'I' -> new IBlock(BlockRole.HOLD);
+			case 'O' -> new OBlock(BlockRole.HOLD);
+			case 'J' -> new JBlock(BlockRole.HOLD);
+			case 'L' -> new LBlock(BlockRole.HOLD);
+			case 'S' -> new SBlock(BlockRole.HOLD);
+			case 'Z' -> new ZBlock(BlockRole.HOLD);
+			case 'T' -> new TBlock(BlockRole.HOLD);
+			default -> null;
+		};
+
 	}
 	
 	public void paint(Graphics g) {
@@ -306,7 +306,6 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 					BlockBox temp = holdBlock;
 					holdBlock = putOnHold(block);
 					block = generateBlock(temp);
-					temp = null;
 					holdUsed = true;
 					repaint();
 				}
