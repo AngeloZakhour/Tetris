@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Random;
 import javax.swing.*;
+import sounds.*;
 
 @SuppressWarnings("serial")
 public class Gameplay extends JPanel implements KeyListener, ActionListener {
@@ -25,8 +26,8 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 	private boolean holdEmpty = true;
 	
 	
-	private Random random = new Random();
-	public static int blockSize = 30;
+	private final Random random = new Random();
+	public final static int blockSize = 30;
 	
 	//Blocks
 	private BlockBox block;
@@ -35,11 +36,9 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 	
 	// Layout
 	static int bottomBorderYStart = Main.frameHeight-50;
-	static int bottomBorderHeight = Main.frameHeight-bottomBorderYStart;
 	static int topBorderHeight = bottomBorderYStart-(20*blockSize)-1;//-1 for adjustment
 	static int leftBorderWidth = (Main.frameWidth/2)-(5*blockSize);
 	static int rightBorderXStart = leftBorderWidth + (10*blockSize);
-	static int rightBorderWidth = Main.frameWidth - rightBorderXStart;
 	
 	static int sideBoxesXIncrement = 23;
 	static int nextBlockYStart = topBorderHeight+blockSize+10;
@@ -54,8 +53,8 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 	private int delay = initialDelay;
 	
 	// Board
-	private int boardRows = 20;
-	private int boardCols = 10;
+	private final int boardRows = 20;
+	private final int boardCols = 10;
 	
 	//Logo
 	private final ImageIcon logo = new ImageIcon("src/images/tetris-logo.png");
@@ -68,7 +67,11 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 	int scaledBgWidth = Math.toIntExact(Math.round(bg.getIconWidth()*1.22));
 	int scaledBgHeight = Math.toIntExact(Math.round(bg.getIconHeight()*1.22));
 	private final ImageIcon scaledBg = new ImageIcon(bg.getImage().getScaledInstance(scaledBgWidth, scaledBgHeight, Image.SCALE_SMOOTH));
-	
+
+	static{
+		SoundManager.playSound(SoundType.SOUNDTRACK, true);
+	}
+
 	public Gameplay() {
 		addKeyListener(this);
 		setFocusable(true);
@@ -81,7 +84,6 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
 		
 		timer = new Timer(initialDelay, this);
-		timer.setInitialDelay(initialDelay);
 	}
 	
 	private BlockBox generateBlock() {
@@ -143,13 +145,15 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 		scaledLogo.paintIcon(this, g, leftBorderWidth, 0);
 
 		//Next block / Hold block
-		g.setColor(Color.BLACK);
-		g.fillRect(nextBlockXStart, nextBlockYStart, 5*blockSize, 4*blockSize);
-		g.fillRect(holdBlockXStart, holdBlockYStart, 5*blockSize, 4*blockSize);
-		g.setColor(Color.white);
+		g.setColor(Color.WHITE);
+		g.drawRect(nextBlockXStart, nextBlockYStart, 5*blockSize, 4*blockSize);
+		g.drawRect(holdBlockXStart, holdBlockYStart, 5*blockSize, 4*blockSize);
 		g.setFont(new Font("Arial", Font.BOLD, 25));
 		g.drawString("Up Next", nextBlockXStart+blockSize, topBorderHeight+blockSize);
 		g.drawString("Hold", (int) (holdBlockXStart+1.5*blockSize), topBorderHeight+blockSize);
+		g.setColor(new Color(181, 181, 181, 30));
+		g.fillRect(nextBlockXStart, nextBlockYStart, 5*blockSize, 4*blockSize);
+		g.fillRect(holdBlockXStart, holdBlockYStart, 5*blockSize, 4*blockSize);
 		
 		if(play && !gamePaused) {
 			//Block
@@ -256,13 +260,12 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 			if(play) {
 				play = false;
 				gamePaused = true;
-				repaint();
 			}
 			else {
 				play = true;
 				gamePaused = false;
-				repaint();
 			}
+			repaint();
 		}
 		if(!play && !gameLost && (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_ENTER)) {
 			play=true;
@@ -273,11 +276,13 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 		if(play) {
 			if(e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D) {
 				block.moveRight();
-				repaint();		
+				repaint();
+				SoundManager.playSound(SoundType.MOVE);
 			}
 			else if(e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A) {
 				block.moveLeft();
 				repaint();
+				SoundManager.playSound(SoundType.MOVE);
 			}
 			else if(e.getKeyCode() == KeyEvent.VK_SPACE) {
 				if(block.gravity()) {
@@ -288,10 +293,12 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 			else if(e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) {
 				block.rotateRight();
 				repaint();
+				SoundManager.playSound(SoundType.ROTATE);
 			}
 			else if(e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
 				block.rotateLeft();
 				repaint();
+				SoundManager.playSound(SoundType.ROTATE);
 			}
 			else if(e.getKeyCode() == KeyEvent.VK_C) {
 				if(holdEmpty) {
@@ -299,16 +306,15 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 					block = generateBlock(nextBlock);
 					nextBlock = generateNextBlock();
 					holdEmpty = false;
-					holdUsed = true;
-					repaint();
 				}
 				else if(!holdUsed){
 					BlockBox temp = holdBlock;
 					holdBlock = putOnHold(block);
 					block = generateBlock(temp);
 					holdUsed = true;
-					repaint();
 				}
+				repaint();
+				SoundManager.playSound(SoundType.ROTATE);
 			}
 		}
 		if(gameLost) {
@@ -326,7 +332,6 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 				score = 0;
 				level = 1;
 				lines = 0;
-				//timer.restart();
 				timer.stop();
 				timer = new Timer(initialDelay, this);
 				repaint();

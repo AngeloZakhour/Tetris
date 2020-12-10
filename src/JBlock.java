@@ -75,45 +75,110 @@ public class JBlock extends BlockBox{
 		
 		if(blockRole == BlockRole.NEXT) {
 			for(int[] square: coord) {
-				g.fillRect(Gameplay.nextBlockXStart+(square[1]*Gameplay.blockSize), Gameplay.nextBlockYStart+(square[0]*Gameplay.blockSize), Gameplay.blockSize, Gameplay.blockSize);
+				g.fillRect(
+						Gameplay.nextBlockXStart+(square[1]*Gameplay.blockSize),
+						Gameplay.nextBlockYStart+(square[0]*Gameplay.blockSize),
+						Gameplay.blockSize,
+						Gameplay.blockSize
+				);
 			}
 			for(int[] square: coord) {
 				g.setColor(Color.LIGHT_GRAY);
 				g.setStroke(new BasicStroke((float)1));
-				g.drawRect(Gameplay.nextBlockXStart+(square[1]*Gameplay.blockSize), Gameplay.nextBlockYStart+(square[0]*Gameplay.blockSize), Gameplay.blockSize, Gameplay.blockSize);
+				g.drawRect(
+						Gameplay.nextBlockXStart+(square[1]*Gameplay.blockSize),
+						Gameplay.nextBlockYStart+(square[0]*Gameplay.blockSize),
+						Gameplay.blockSize,
+						Gameplay.blockSize
+				);
 			}			
 			return;
 		}
 		
 		if(blockRole == BlockRole.HOLD) {
 			for(int[] square: coord) {
-				g.fillRect(Gameplay.holdBlockXStart+(square[1]*Gameplay.blockSize), Gameplay.holdBlockYStart+(square[0]*Gameplay.blockSize), Gameplay.blockSize, Gameplay.blockSize);
+				g.fillRect(
+						Gameplay.holdBlockXStart+(square[1]*Gameplay.blockSize),
+						Gameplay.holdBlockYStart+(square[0]*Gameplay.blockSize),
+						Gameplay.blockSize,
+						Gameplay.blockSize
+				);
 			}
 			for(int[] square: coord) {
 				g.setColor(Color.LIGHT_GRAY);
 				g.setStroke(new BasicStroke((float)1));
-				g.drawRect(Gameplay.holdBlockXStart+(square[1]*Gameplay.blockSize), Gameplay.holdBlockYStart+(square[0]*Gameplay.blockSize), Gameplay.blockSize, Gameplay.blockSize);
+				g.drawRect(
+						Gameplay.holdBlockXStart+(square[1]*Gameplay.blockSize),
+						Gameplay.holdBlockYStart+(square[0]*Gameplay.blockSize),
+						Gameplay.blockSize,
+						Gameplay.blockSize
+				);
 			}			
 			return;
 		}
 		
 		if(coord[1][0] < 0 && coord[0][0] < 0) {
-			g.fillRect(Board.x0+(coord[2][1]*Gameplay.blockSize), Board.y0+(coord[2][0]*Gameplay.blockSize), Gameplay.blockSize, Gameplay.blockSize);
-			g.fillRect(Board.x0+(coord[3][1]*Gameplay.blockSize), Board.y0+(coord[3][0]*Gameplay.blockSize), Gameplay.blockSize, Gameplay.blockSize);
+			g.fillRect(
+					Board.x0+(coord[2][1]*Gameplay.blockSize),
+					Board.y0+(coord[2][0]*Gameplay.blockSize),
+					Gameplay.blockSize,
+					Gameplay.blockSize
+			);
+			g.fillRect(
+					Board.x0+(coord[3][1]*Gameplay.blockSize),
+					Board.y0+(coord[3][0]*Gameplay.blockSize),
+					Gameplay.blockSize,
+					Gameplay.blockSize
+			);
 		}
 		else if(coord[0][0] < 0) {
-			g.fillRect(Board.x0+(coord[1][1]*Gameplay.blockSize), Board.y0+(coord[1][0]*Gameplay.blockSize), Gameplay.blockSize, Gameplay.blockSize);
-			g.fillRect(Board.x0+(coord[2][1]*Gameplay.blockSize), Board.y0+(coord[2][0]*Gameplay.blockSize), Gameplay.blockSize, Gameplay.blockSize);
-			g.fillRect(Board.x0+(coord[3][1]*Gameplay.blockSize), Board.y0+(coord[3][0]*Gameplay.blockSize), Gameplay.blockSize, Gameplay.blockSize);
+			g.fillRect(
+					Board.x0+(coord[1][1]*Gameplay.blockSize),
+					Board.y0+(coord[1][0]*Gameplay.blockSize),
+					Gameplay.blockSize,
+					Gameplay.blockSize
+			);
+			g.fillRect(
+					Board.x0+(coord[2][1]*Gameplay.blockSize),
+					Board.y0+(coord[2][0]*Gameplay.blockSize),
+					Gameplay.blockSize,
+					Gameplay.blockSize
+			);
+			g.fillRect(
+					Board.x0+(coord[3][1]*Gameplay.blockSize),
+					Board.y0+(coord[3][0]*Gameplay.blockSize),
+					Gameplay.blockSize,
+					Gameplay.blockSize
+			);
 		}
 		else if(coord[3][0] < 0) {
-			g.fillRect(Board.x0+(coord[1][1]*Gameplay.blockSize), Board.y0+(coord[1][0]*Gameplay.blockSize), Gameplay.blockSize, Gameplay.blockSize);
-			g.fillRect(Board.x0+(coord[2][1]*Gameplay.blockSize), Board.y0+(coord[2][0]*Gameplay.blockSize), Gameplay.blockSize, Gameplay.blockSize);
-			g.fillRect(Board.x0+(coord[0][1]*Gameplay.blockSize), Board.y0+(coord[0][0]*Gameplay.blockSize), Gameplay.blockSize, Gameplay.blockSize);
+			g.fillRect(
+					Board.x0+(coord[1][1]*Gameplay.blockSize),
+					Board.y0+(coord[1][0]*Gameplay.blockSize),
+					Gameplay.blockSize,
+					Gameplay.blockSize
+			);
+			g.fillRect(
+					Board.x0+(coord[2][1]*Gameplay.blockSize),
+					Board.y0+(coord[2][0]*Gameplay.blockSize),
+					Gameplay.blockSize,
+					Gameplay.blockSize
+			);
+			g.fillRect(
+					Board.x0+(coord[0][1]*Gameplay.blockSize),
+					Board.y0+(coord[0][0]*Gameplay.blockSize),
+					Gameplay.blockSize,
+					Gameplay.blockSize
+			);
 		}
 		else {
 			for(int[] square:coord) {
-				g.fillRect(Board.x0+(square[1]*Gameplay.blockSize), Board.y0+(square[0]*Gameplay.blockSize), Gameplay.blockSize, Gameplay.blockSize);
+				g.fillRect(
+						Board.x0+(square[1]*Gameplay.blockSize),
+						Board.y0+(square[0]*Gameplay.blockSize),
+						Gameplay.blockSize,
+						Gameplay.blockSize
+				);
 			}	
 		}
 	}
@@ -225,8 +290,11 @@ public class JBlock extends BlockBox{
 		if(coord[0][1]+1 >= Board.board[0].length || coord[3][1]+1 >= Board.board[0].length) {
 			return;
 		}//Checking other blocks on the board
-		else if((coord[0][0] >= 0 && Board.board[coord[0][0]][coord[0][1]+1] != 0) || (coord[1][0] >= 0 && Board.board[coord[1][0]][coord[1][1]+1] != 0) || 
-				Board.board[coord[2][0]][coord[2][1]+1] != 0 || (coord[3][0] >= 0 && Board.board[coord[3][0]][coord[3][1]+1] != 0)) {
+		else if((coord[0][0] >= 0 && Board.board[coord[0][0]][coord[0][1]+1] != 0) ||
+				(coord[1][0] >= 0 && Board.board[coord[1][0]][coord[1][1]+1] != 0) ||
+				Board.board[coord[2][0]][coord[2][1]+1] != 0 ||
+				(coord[3][0] >= 0 && Board.board[coord[3][0]][coord[3][1]+1] != 0))
+		{
 			return;
 		}
 		else {
@@ -240,8 +308,11 @@ public class JBlock extends BlockBox{
 		if(coord[0][1]-1 < 0 || coord[3][1]-1 < 0) {
 			return;
 		}//Checking other blocks on the board
-		else if((coord[0][0] >= 0 && Board.board[coord[0][0]][coord[0][1]-1] != 0) || (coord[1][0] >= 0 && Board.board[coord[1][0]][coord[1][1]-1] != 0) || 
-				Board.board[coord[2][0]][coord[2][1]-1] != 0 || (coord[3][0] >= 0 && Board.board[coord[3][0]][coord[3][1]-1] != 0)) {
+		else if((coord[0][0] >= 0 && Board.board[coord[0][0]][coord[0][1]-1] != 0) ||
+				(coord[1][0] >= 0 && Board.board[coord[1][0]][coord[1][1]-1] != 0) ||
+				Board.board[coord[2][0]][coord[2][1]-1] != 0 ||
+				(coord[3][0] >= 0 && Board.board[coord[3][0]][coord[3][1]-1] != 0))
+		{
 			return;
 		}
 		else {
