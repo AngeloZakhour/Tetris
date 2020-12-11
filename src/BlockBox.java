@@ -1,15 +1,16 @@
 import java.awt.Graphics2D;
+import java.util.HashMap;
 
 public abstract class BlockBox {
 
 	protected int[][] boxCorners = new int[4][2];
+	protected int[][] coord = new int[4][2];
 	protected int rotation = 0;
 	protected char blockType;
 	protected BlockRole blockRole;
 	
-	
 	public BlockBox(int boxSize, BlockRole br) {
-		if(br == BlockRole.REGULAR) {
+		if(br == BlockRole.REGULAR || br == BlockRole.SHADOW) {
 			if(boxSize==4) {
 				boxCorners[0][0] = 0;	boxCorners[1][0] = 0;	boxCorners[2][0] = 3;	boxCorners[3][0] = 3;
 				boxCorners[0][1] = 3;	boxCorners[1][1] = 6;	boxCorners[2][1] = 6;	boxCorners[3][1] = 3;			
@@ -95,9 +96,16 @@ public abstract class BlockBox {
 		}
 	}
 
-	public abstract void draw(Graphics2D g);
+	public boolean reachedEnd(){
+		for(int[] square: coord) {
+			if(square[0]+1 >= Board.board.length || Board.board[square[0]+1][square[1]] != 0) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-	public abstract boolean reachedEnd();
+	public abstract void draw(Graphics2D g);
 
 	public abstract void endMovement();
 

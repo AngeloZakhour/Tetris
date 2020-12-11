@@ -4,8 +4,6 @@ import java.awt.Graphics2D;
 
 
 public class LBlock extends BlockBox{
-
-	protected int[][] coord = new int[4][2];
 	
 	public LBlock(BlockRole br) {
 		super(3, br);
@@ -74,7 +72,7 @@ public class LBlock extends BlockBox{
 	}
 	
 	public void draw(Graphics2D g) {
-		g.setColor(BlockColors.getLColor());
+		g.setColor(BlockColors.getColor('L'));
 		
 		if(blockRole == BlockRole.NEXT) {
 			for(int[] square: coord) {
@@ -323,33 +321,24 @@ public class LBlock extends BlockBox{
 		}
 	}
 
-	public boolean reachedEnd() {
-		for(int[] square: coord) {
-			if(square[0]+1 >= Board.board.length || Board.board[square[0]+1][square[1]] != 0) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public void endMovement() {
 		if(coord[1][0] <0 && coord[0][0]<0) {
-			Board.modBoard(coord[2][0], coord[2][1], 4);
-			Board.modBoard(coord[3][0], coord[3][1], 4);
+			Board.modBoard(coord[2][0], coord[2][1], 'L');
+			Board.modBoard(coord[3][0], coord[3][1], 'L');
 		}
 		else if(coord[0][0] < 0) {
-			Board.modBoard(coord[1][0], coord[1][1], 4);
-			Board.modBoard(coord[2][0], coord[2][1], 4);
-			Board.modBoard(coord[3][0], coord[3][1], 4);
+			Board.modBoard(coord[1][0], coord[1][1], 'L');
+			Board.modBoard(coord[2][0], coord[2][1], 'L');
+			Board.modBoard(coord[3][0], coord[3][1], 'L');
 		}
 		else if(coord[3][0] <0) {
-			Board.modBoard(coord[0][0], coord[0][1], 4);
-			Board.modBoard(coord[1][0], coord[1][1], 4);
-			Board.modBoard(coord[2][0], coord[2][1], 4);
+			Board.modBoard(coord[0][0], coord[0][1], 'L');
+			Board.modBoard(coord[1][0], coord[1][1], 'L');
+			Board.modBoard(coord[2][0], coord[2][1], 'L');
 		}
 		else {
 			for(int[] square: coord) {
-				Board.modBoard(square[0], square[1], 4);
+				Board.modBoard(square[0], square[1], 'L');
 			}
 		}
 		

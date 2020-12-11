@@ -1,3 +1,3 @@
 public enum BlockRole {
-    REGULAR, NEXT, HOLD
+    REGULAR, NEXT, HOLD, SHADOW
 }

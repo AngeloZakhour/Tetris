@@ -3,8 +3,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 public class OBlock extends BlockBox{
-
-	protected int[][] coord = new int[4][2];
 	
 	public OBlock(BlockRole br) {
 		super(2, br);
@@ -52,7 +50,7 @@ public class OBlock extends BlockBox{
 	}
 	
 	public void draw(Graphics2D g) {
-		g.setColor(BlockColors.getOColor());
+		g.setColor(BlockColors.getColor('O'));
 		
 		if(blockRole == BlockRole.NEXT) {
 			for(int[] square: coord) {
@@ -174,12 +172,12 @@ public class OBlock extends BlockBox{
 
 	public void endMovement() {
 		if(coord[0][0] < 0) {
-			Board.modBoard(coord[2][0], coord[2][1], 2);
-			Board.modBoard(coord[3][0], coord[3][1], 2);
+			Board.modBoard(coord[2][0], coord[2][1], 'O');
+			Board.modBoard(coord[3][0], coord[3][1], 'O');
 		}
 		else {
 			for(int[] square: coord) {
-				Board.modBoard(square[0], square[1], 2);
+				Board.modBoard(square[0], square[1], 'O');
 			}
 		}
 	}

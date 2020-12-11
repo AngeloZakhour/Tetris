@@ -1,11 +1,7 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.util.Random;
 import javax.swing.*;
-import sounds.*;
 
 @SuppressWarnings("serial")
 public class Gameplay extends JPanel implements KeyListener, ActionListener {
@@ -24,8 +20,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 	
 	private boolean holdUsed = false;
 	private boolean holdEmpty = true;
-	
-	
+
 	private final Random random = new Random();
 	public final static int blockSize = 30;
 	
@@ -33,6 +28,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 	private BlockBox block;
 	private BlockBox nextBlock;
 	private BlockBox holdBlock;
+	private BlockBox shadowBlock;
 	
 	// Layout
 	static int bottomBorderYStart = Main.frameHeight-50;
@@ -58,19 +54,23 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 	
 	//Logo
 	private final ImageIcon logo = new ImageIcon("src/images/tetris-logo.png");
-	int scaledWidth = Math.toIntExact(Math.round(logo.getIconWidth()/1.17))-1;
-	int scaledHeight = Math.toIntExact(Math.round(logo.getIconHeight()/1.17));
-	private final ImageIcon scaledLogo = new ImageIcon(logo.getImage().getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH));
+	private final int scaledWidth = Math.toIntExact(Math.round(logo.getIconWidth()/1.17))-1;
+	private final int scaledHeight = Math.toIntExact(Math.round(logo.getIconHeight()/1.17));
+	private final ImageIcon scaledLogo =
+			new ImageIcon(logo.getImage().getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH));
 
 	//Background
 	private final ImageIcon bg = new ImageIcon("src/images/bg.png");
 	int scaledBgWidth = Math.toIntExact(Math.round(bg.getIconWidth()*1.22));
 	int scaledBgHeight = Math.toIntExact(Math.round(bg.getIconHeight()*1.22));
-	private final ImageIcon scaledBg = new ImageIcon(bg.getImage().getScaledInstance(scaledBgWidth, scaledBgHeight, Image.SCALE_SMOOTH));
+	private final ImageIcon scaledBg =
+			new ImageIcon(bg.getImage().getScaledInstance(scaledBgWidth, scaledBgHeight, Image.SCALE_SMOOTH));
 
+	//Sound
 	static{
-		SoundManager.playSound(SoundType.SOUNDTRACK, true);
+		SoundManager.playMusic();
 	}
+
 
 	public Gameplay() {
 		addKeyListener(this);
@@ -79,33 +79,26 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 		
 		Board.setBoard(boardRows, boardCols, leftBorderWidth, topBorderHeight);
 		
-		block = generateBlock();
-		nextBlock = generateNextBlock();
+		block = generateBlock(BlockRole.REGULAR);
+		nextBlock = generateBlock(BlockRole.NEXT);
 
-		
 		timer = new Timer(initialDelay, this);
+
+		addMouseListener();
 	}
 	
-	private BlockBox generateBlock() {
-		return generateBlock(BlockRole.REGULAR);
-	}
-	
-	private BlockBox generateBlock(BlockBox bb) {
+	private BlockBox generateBlock(BlockBox bb, BlockRole role) {
 
 		return switch (bb.blockType) {
-			case 'I' -> new IBlock(BlockRole.REGULAR);
-			case 'O' -> new OBlock(BlockRole.REGULAR);
-			case 'J' -> new JBlock(BlockRole.REGULAR);
-			case 'L' -> new LBlock(BlockRole.REGULAR);
-			case 'S' -> new SBlock(BlockRole.REGULAR);
-			case 'Z' -> new ZBlock(BlockRole.REGULAR);
-			case 'T' -> new TBlock(BlockRole.REGULAR);
+			case 'I' -> new IBlock(role);
+			case 'O' -> new OBlock(role);
+			case 'J' -> new JBlock(role);
+			case 'L' -> new LBlock(role);
+			case 'S' -> new SBlock(role);
+			case 'Z' -> new ZBlock(role);
+			case 'T' -> new TBlock(role);
 			default -> null;
 		};
-	}
-	
-	private BlockBox generateNextBlock() {
-		return generateBlock(BlockRole.NEXT);
 	}
 
 	private BlockBox generateBlock(BlockRole role){
@@ -144,6 +137,9 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 		//Title
 		scaledLogo.paintIcon(this, g, leftBorderWidth, 0);
 
+		//Sound
+		SoundDisplay.draw(this, (Graphics2D) g);
+
 		//Next block / Hold block
 		g.setColor(Color.WHITE);
 		g.drawRect(nextBlockXStart, nextBlockYStart, 5*blockSize, 4*blockSize);
@@ -154,58 +150,77 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 		g.setColor(new Color(181, 181, 181, 30));
 		g.fillRect(nextBlockXStart, nextBlockYStart, 5*blockSize, 4*blockSize);
 		g.fillRect(holdBlockXStart, holdBlockYStart, 5*blockSize, 4*blockSize);
-		
-		if(play && !gamePaused) {
-			//Block
-			block.draw((Graphics2D) g);
-			nextBlock.draw((Graphics2D) g);
-		}
-		
-		if(!holdEmpty) {
-			holdBlock.draw((Graphics2D) g);
-		}
-		
-		// Board
-		Board.draw((Graphics2D) g);	
-		
+
 		//Score
 		g.setColor(Color.white);
 		g.setFont(new Font("Arial", Font.BOLD, 25));
 		g.drawString("Score: "+score, rightBorderXStart+23, topBorderHeight+7*blockSize);
 		g.drawString("Level: "+level, rightBorderXStart+23, topBorderHeight+8*blockSize);
 		g.drawString("Lines: "+lines, rightBorderXStart+23, topBorderHeight+9*blockSize);
+
+		if(play && !gamePaused) {
+			//Block
+			block.draw((Graphics2D) g);
+			nextBlock.draw((Graphics2D) g);
+
+			if(!holdEmpty) {
+				holdBlock.draw((Graphics2D) g);
+			}
+
+			// Board
+			Board.draw((Graphics2D) g);
+			return;
+		}
 		
 		
 		//Game paused
 		if(gamePaused) {
-			g.setColor(Color.DARK_GRAY);
+			Board.draw((Graphics2D) g, false);
+			g.setColor(new Color(60, 60, 60, 100));
 			g.fillRect(leftBorderWidth, topBorderHeight, boardCols*blockSize, boardRows*blockSize);
 			g.fillRect(nextBlockXStart, nextBlockYStart, 5*30, 4*30);
 			g.fillRect(holdBlockXStart, holdBlockYStart, 5*30, 4*30);
 			
 			g.setColor(Color.WHITE);
 			g.setFont(new Font("Arial", Font.BOLD, 35));
-			g.drawString("GAME PAUSED", leftBorderWidth+25, ((bottomBorderYStart-topBorderHeight)/2)+topBorderHeight);
+			g.drawString(
+					"GAME PAUSED",
+					leftBorderWidth+25,
+					((bottomBorderYStart-topBorderHeight)/2)+topBorderHeight
+			);
+
+
+			return;
 		}
+
+		Board.draw((Graphics2D) g);
+
 
 		//Game over
 		if(gameLost) {
-			g.setColor(Color.DARK_GRAY);
-			g.fillRect(leftBorderWidth, topBorderHeight+8*blockSize, 10*blockSize, 4*blockSize);
+			g.setColor(new Color(60, 60, 60, 200));
+			g.fillRect(leftBorderWidth, topBorderHeight, boardCols*blockSize, boardRows*blockSize);
 			
-			g.setColor(Color.RED);
+			g.setColor(new Color(230, 0, 0));
 			g.setFont(new Font("Arial", Font.BOLD, 35));
-			g.drawString("GAME OVER!", leftBorderWidth + blockSize + blockSize/2, ((bottomBorderYStart-topBorderHeight)/2)+topBorderHeight);
+			g.drawString(
+					"GAME OVER!",
+					leftBorderWidth + blockSize + blockSize/2,
+					((bottomBorderYStart-topBorderHeight)/2)+topBorderHeight
+			);
 			
 			g.setFont(new Font("Arial", Font.BOLD, 15));
-			g.drawString("Press ENTER to Restart", leftBorderWidth+2*blockSize, ((bottomBorderYStart-topBorderHeight)/2)+topBorderHeight+blockSize);	
+			g.drawString(
+					"Press ENTER to Restart",
+					leftBorderWidth+2*blockSize,
+					((bottomBorderYStart-topBorderHeight)/2)+topBorderHeight+blockSize
+			);
 		}
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(play) {
-			
 			if(block.reachedEnd()) {
 				block.endMovement();
 				if(Board.gameLost()) {
@@ -241,8 +256,8 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 					level += 1;
 				}
 				
-				block = generateBlock(nextBlock);
-				nextBlock = generateNextBlock();
+				block = generateBlock(nextBlock, BlockRole.REGULAR);
+				nextBlock = generateBlock(BlockRole.NEXT);
 				holdUsed = false;
 			}
 			else
@@ -260,14 +275,16 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 			if(play) {
 				play = false;
 				gamePaused = true;
+				SoundManager.pauseMusic();
 			}
 			else {
 				play = true;
 				gamePaused = false;
+				SoundManager.resumeMusic();
 			}
 			repaint();
 		}
-		if(!play && !gameLost && (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_ENTER)) {
+		if(!play && !gameLost && !gamePaused && (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_ENTER)) {
 			play=true;
 			timer.start();
 			repaint();
@@ -303,14 +320,14 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 			else if(e.getKeyCode() == KeyEvent.VK_C) {
 				if(holdEmpty) {
 					holdBlock = putOnHold(block);
-					block = generateBlock(nextBlock);
-					nextBlock = generateNextBlock();
+					block = generateBlock(nextBlock, BlockRole.REGULAR);
+					nextBlock = generateBlock(BlockRole.NEXT);
 					holdEmpty = false;
 				}
 				else if(!holdUsed){
 					BlockBox temp = holdBlock;
 					holdBlock = putOnHold(block);
-					block = generateBlock(temp);
+					block = generateBlock(temp, BlockRole.REGULAR);
 					holdUsed = true;
 				}
 				repaint();
@@ -323,8 +340,8 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 				play = true;
 				
 				Board.setBoard(boardRows, boardCols, leftBorderWidth, topBorderHeight);
-				block = generateBlock();
-				nextBlock = generateNextBlock();
+				block = generateBlock(BlockRole.REGULAR);
+				nextBlock = generateBlock(BlockRole.NEXT);
 				holdBlock = null;
 				holdEmpty = true;
 				holdUsed = false;
@@ -337,7 +354,28 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 				repaint();
 			}
 		}
+
+		if(e.getKeyCode() == KeyEvent.VK_PLUS || e.getKeyCode() == KeyEvent.VK_EQUALS){
+			SoundManager.increaseVolume();
+			repaint();
+		}
+
+		if(e.getKeyCode() == KeyEvent.VK_MINUS){
+			SoundManager.decreaseVolume();
+			repaint();
+		}
 		
+	}
+
+	private void addMouseListener(){
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(SoundDisplay.mouseClicked(getMousePosition())){
+					repaint();
+				}
+			}
+		});
 	}
 		
 	@Override

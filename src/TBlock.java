@@ -3,8 +3,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 public class TBlock extends BlockBox{
-
-	protected int[][] coord = new int[4][2];
 	
 	public TBlock(BlockRole br) {
 		super(3, br);
@@ -70,7 +68,7 @@ public class TBlock extends BlockBox{
 	}
 	
 	public void draw(Graphics2D g) {
-		g.setColor(BlockColors.getTColor());
+		g.setColor(BlockColors.getColor('T'));
 		
 		if(blockRole == BlockRole.NEXT) {
 			for(int[] square: coord) {
@@ -320,34 +318,25 @@ public class TBlock extends BlockBox{
 		}
 	}
 
-	public boolean reachedEnd() {
-		for(int[] square: coord) {
-			if(square[0]+1 >= Board.board.length || Board.board[square[0]+1][square[1]] != 0) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public void endMovement() {
 		if(coord[0][0] < 0) {
-			Board.modBoard(coord[1][0], coord[1][1], 7);
-			Board.modBoard(coord[2][0], coord[2][1], 7);
-			Board.modBoard(coord[3][0], coord[3][1], 7);
+			Board.modBoard(coord[1][0], coord[1][1], 'T');
+			Board.modBoard(coord[2][0], coord[2][1], 'T');
+			Board.modBoard(coord[3][0], coord[3][1], 'T');
 		}
 		else if(coord[1][0] < 0) {
-			Board.modBoard(coord[0][0], coord[0][1], 7);
-			Board.modBoard(coord[2][0], coord[2][1], 7);
-			Board.modBoard(coord[3][0], coord[3][1], 7);
+			Board.modBoard(coord[0][0], coord[0][1], 'T');
+			Board.modBoard(coord[2][0], coord[2][1], 'T');
+			Board.modBoard(coord[3][0], coord[3][1], 'T');
 		}
 		else if(coord[3][0] < 0) {
-			Board.modBoard(coord[0][0], coord[0][1], 7);
-			Board.modBoard(coord[1][0], coord[1][1], 7);
-			Board.modBoard(coord[2][0], coord[2][1], 7);
+			Board.modBoard(coord[0][0], coord[0][1], 'T');
+			Board.modBoard(coord[1][0], coord[1][1], 'T');
+			Board.modBoard(coord[2][0], coord[2][1], 'T');
 		}
 		else {
 			for(int[] square: coord) {
-				Board.modBoard(square[0], square[1], 7);
+				Board.modBoard(square[0], square[1], 'T');
 			}
 		}
 		

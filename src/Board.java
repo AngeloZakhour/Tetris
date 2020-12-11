@@ -4,7 +4,7 @@ import java.awt.Graphics2D;
 
 public class Board {
 	
-	protected static int[][] board;
+	protected static char[][] board;
 	private static int[] ctr;
 	private static final int blockSize = Gameplay.blockSize;
 	
@@ -14,14 +14,14 @@ public class Board {
 	
 	public static void setBoard(int row, int col, int x, int y) {
 		
-		board = new int[row][col];
+		board = new char[row][col];
 		ctr = new int[row];
 		x0 = x;
 		y0 = y;
 		
 	}
 	
-	public static void modBoard(int row, int col, int value) {
+	public static void modBoard(int row, int col, char value) {
 		
 		board[row][col] = value;
 		ctr[row]++;
@@ -42,9 +42,7 @@ public class Board {
 		}
 		else if(ctr[row] == board[row].length) {
 			for(int i=row; i>0; i--) {
-				for(int j=0; j<board[row].length; j++) {
-					board[i][j] = board[i-1][j];
-				}
+				System.arraycopy(board[i - 1], 0, board[i], 0, board[row].length);
 				ctr[i] = ctr[i-1];
 			}
 			return true;
@@ -54,24 +52,21 @@ public class Board {
 	}
 	
 	public static boolean gameLost() {
-		if(ctr[0] != 0) {
-			return true;
-		}
-		else {
-			return false;
-		}
+		return ctr[0] != 0;
 	}
 	
-	public static void draw(Graphics2D g) {
-		
-		for(int i=0; i<board.length;i++) {
-			for(int j=0; j<board[0].length;j++) {
-				if(board[i][j]>0) {
-					g.setColor(BlockColors.getColor(board[i][j]));
-					g.fillRect(x0+(j*blockSize), y0+((i)*blockSize), blockSize, blockSize);
+	public static void draw(Graphics2D g, boolean drawBlocks) {
+
+		if(drawBlocks) {
+			for (int i = 0; i < board.length; i++) {
+				for (int j = 0; j < board[0].length; j++) {
+					if (board[i][j] > 0) {
+						g.setColor(BlockColors.getColor(board[i][j]));
+						g.fillRect(x0 + (j * blockSize), y0 + ((i) * blockSize), blockSize, blockSize);
+					}
 				}
 			}
-		}	
+		}
 		
 		//Grid
 		for(int i=0; i<board.length;i++) {
@@ -81,6 +76,10 @@ public class Board {
 				g.drawRect(x0+(j*blockSize), y0+((i)*blockSize), blockSize, blockSize);
 			}
 		}
+	}
+
+	public static void draw(Graphics2D g){
+		draw(g, true);
 	}
 	
 	
