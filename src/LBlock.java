@@ -19,7 +19,7 @@ public class LBlock extends BlockBox{
 		}
 				
 		coord = getCoord();
-		blockType = 'L';
+		blockType = blockRole == BlockRole.SHADOW ? 'l' : 'L';
 	}
 	
 	
@@ -66,13 +66,12 @@ public class LBlock extends BlockBox{
 		}
 		else {
 			super.gravity();
-			coord = getCoord();
 			return true;
 		}
 	}
 	
 	public void draw(Graphics2D g) {
-		g.setColor(BlockColors.getColor('L'));
+		g.setColor(BlockColors.getColor(blockType));
 		
 		if(blockRole == BlockRole.NEXT) {
 			for(int[] square: coord) {
@@ -183,7 +182,7 @@ public class LBlock extends BlockBox{
 		}
 	}
 	
-	public boolean rotateRight() {
+	public void rotateRight() {
 		
 		boolean boxMovedLeft = false;
 		boolean boxMovedRight = false;
@@ -207,7 +206,6 @@ public class LBlock extends BlockBox{
 			boxMovedUp = true;
 		}
 		super.rotateRight();
-		coord = getCoord();
 		
 		//Checking for other block in the way
 		for(int[] square: coord) {
@@ -215,27 +213,22 @@ public class LBlock extends BlockBox{
 				
 				if(boxMovedLeft) {
 					super.moveRight();
-					boxMovedLeft = false;
 				}
 				if(boxMovedRight) {
 					super.moveLeft();
-					boxMovedRight = false;
 				}
 				if(boxMovedUp) {
 					super.gravity();
-					boxMovedUp = false;
 				}
 				super.rotateLeft();
-				coord = getCoord();
 				
-				return false;
+				return;
 			}
 		}
-		
-		return true;
+
 	}
 	
-	public boolean rotateLeft() {
+	public void rotateLeft() {
 
 		boolean boxMovedLeft = false;
 		boolean boxMovedRight = false;
@@ -257,7 +250,6 @@ public class LBlock extends BlockBox{
 			boxMovedUp = true;
 		}
 		super.rotateLeft();
-		coord = getCoord();	
 		
 		//Checking for other block in the way
 		for(int[] square: coord) {
@@ -265,24 +257,19 @@ public class LBlock extends BlockBox{
 				
 				if(boxMovedLeft) {
 					super.moveRight();
-					boxMovedLeft = false;
 				}
 				if(boxMovedRight) {
 					super.moveLeft();
-					boxMovedRight = false;
 				}
 				if(boxMovedUp) {
 					super.gravity();
-					boxMovedUp = false;
 				}
 				super.rotateRight();
-				coord = getCoord();
 				
-				return false;
+				return;
 			}
 		}
-		
-		return true;
+
 	}
 	
 	public void moveRight() {
@@ -299,7 +286,6 @@ public class LBlock extends BlockBox{
 		}
 		else {
 			super.moveRight();
-			coord = getCoord();
 		}
 	}
 	
@@ -317,28 +303,27 @@ public class LBlock extends BlockBox{
 		}
 		else {
 			super.moveLeft();
-			coord = getCoord();
 		}
 	}
 
 	public void endMovement() {
 		if(coord[1][0] <0 && coord[0][0]<0) {
-			Board.modBoard(coord[2][0], coord[2][1], 'L');
-			Board.modBoard(coord[3][0], coord[3][1], 'L');
+			Board.modBoard(coord[2][0], coord[2][1], blockType);
+			Board.modBoard(coord[3][0], coord[3][1], blockType);
 		}
 		else if(coord[0][0] < 0) {
-			Board.modBoard(coord[1][0], coord[1][1], 'L');
-			Board.modBoard(coord[2][0], coord[2][1], 'L');
-			Board.modBoard(coord[3][0], coord[3][1], 'L');
+			Board.modBoard(coord[1][0], coord[1][1], blockType);
+			Board.modBoard(coord[2][0], coord[2][1], blockType);
+			Board.modBoard(coord[3][0], coord[3][1], blockType);
 		}
 		else if(coord[3][0] <0) {
-			Board.modBoard(coord[0][0], coord[0][1], 'L');
-			Board.modBoard(coord[1][0], coord[1][1], 'L');
-			Board.modBoard(coord[2][0], coord[2][1], 'L');
+			Board.modBoard(coord[0][0], coord[0][1], blockType);
+			Board.modBoard(coord[1][0], coord[1][1], blockType);
+			Board.modBoard(coord[2][0], coord[2][1], blockType);
 		}
 		else {
 			for(int[] square: coord) {
-				Board.modBoard(square[0], square[1], 'L');
+				Board.modBoard(square[0], square[1], blockType);
 			}
 		}
 		

@@ -1,5 +1,4 @@
 import java.awt.Graphics2D;
-import java.util.HashMap;
 
 public abstract class BlockBox {
 
@@ -45,11 +44,40 @@ public abstract class BlockBox {
 	public BlockRole getBlockRole(){
 		return blockRole;
 	}
-	
+
+	public int getRotation(){
+		return rotation;
+	}
+
+	public void setRotation(int rotation){
+		this.rotation = rotation;
+	}
+
+	public int[][] getBoxCorners(){
+		int[][] boxCornersClone = new int[4][2];
+		for(int i = 0; i<boxCorners.length; i++){
+			System.arraycopy(boxCorners[i], 0, boxCornersClone[i], 0, boxCorners[0].length);
+		}
+		return boxCornersClone;
+	}
+
+	public void setBoxCorners(int[][] corners){
+		boxCorners = corners;
+	}
+
+	public void updateCoord(){
+		coord = getCoord();
+	}
+
+	public char getBlockType(){
+		return blockType;
+	}
+
 	public boolean gravity() {
 		for(int[] corner: boxCorners) {
 			corner[0] += 1;
 		}
+		updateCoord();
 		return true;
 	}
 	
@@ -59,7 +87,7 @@ public abstract class BlockBox {
 		}
 	}
 	
-	public boolean rotateRight() {
+	public void rotateRight() {
 		int[] temp = boxCorners[0];
 		boxCorners[0] = boxCorners[1];
 		boxCorners[1] = boxCorners[2];
@@ -67,10 +95,10 @@ public abstract class BlockBox {
 		boxCorners[3] = temp;
 		
 		rotation = (rotation+1)%4;
-		return true;
+		updateCoord();
 	}
 	
-	public boolean rotateLeft() {
+	public void rotateLeft() {
 		int[] temp = boxCorners[0];
 		boxCorners[0] = boxCorners[3];
 		boxCorners[3] = boxCorners[2];
@@ -81,29 +109,40 @@ public abstract class BlockBox {
 			rotation = 3;
 		else
 			rotation = (rotation-1)%4;
-		return true;
+		updateCoord();
 	}
 	
 	public void moveRight() {
 		for(int[] corner: boxCorners) {
 			corner[1] += 1;
 		}
+		updateCoord();
 	}
 	
 	public void moveLeft() {
 		for(int[] corner: boxCorners) {
 			corner[1] -= 1;
 		}
+		updateCoord();
 	}
 
 	public boolean reachedEnd(){
 		for(int[] square: coord) {
-			if(square[0]+1 >= Board.board.length || Board.board[square[0]+1][square[1]] != 0) {
+			if(square[0]+1 >= Board.board.length ||
+					(Board.board[square[0]+1][square[1]] != 0 && Board.board[square[0]+1][square[1]] < 91)) {
 				return true;
 			}
 		}
 		return false;
 	}
+
+	public void hardDrop(BlockBox shadow){
+		setBoxCorners(shadow.getBoxCorners());
+		setRotation(shadow.getRotation());
+		updateCoord();
+	}
+
+	public abstract int[][] getCoord();
 
 	public abstract void draw(Graphics2D g);
 

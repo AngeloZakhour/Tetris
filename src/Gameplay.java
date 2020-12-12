@@ -78,25 +78,22 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 		setFocusTraversalKeysEnabled(false);
 		
 		Board.setBoard(boardRows, boardCols, leftBorderWidth, topBorderHeight);
-		
-		block = generateBlock(BlockRole.REGULAR);
-		nextBlock = generateBlock(BlockRole.NEXT);
 
 		timer = new Timer(initialDelay, this);
 
 		addMouseListener();
 	}
 	
-	private BlockBox generateBlock(BlockBox bb, BlockRole role) {
+	private BlockBox generateBlock(BlockBox bb) {
 
 		return switch (bb.blockType) {
-			case 'I' -> new IBlock(role);
-			case 'O' -> new OBlock(role);
-			case 'J' -> new JBlock(role);
-			case 'L' -> new LBlock(role);
-			case 'S' -> new SBlock(role);
-			case 'Z' -> new ZBlock(role);
-			case 'T' -> new TBlock(role);
+			case 'I' -> new IBlock(BlockRole.REGULAR);
+			case 'O' -> new OBlock(BlockRole.REGULAR);
+			case 'J' -> new JBlock(BlockRole.REGULAR);
+			case 'L' -> new LBlock(BlockRole.REGULAR);
+			case 'S' -> new SBlock(BlockRole.REGULAR);
+			case 'Z' -> new ZBlock(BlockRole.REGULAR);
+			case 'T' -> new TBlock(BlockRole.REGULAR);
 			default -> null;
 		};
 	}
@@ -128,6 +125,30 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 			default -> null;
 		};
 
+	}
+
+	private void generateShadow(){
+		shadowBlock = switch (block.blockType) {
+			case 'I' -> new IBlock(BlockRole.SHADOW);
+			case 'O' -> new OBlock(BlockRole.SHADOW);
+			case 'J' -> new JBlock(BlockRole.SHADOW);
+			case 'L' -> new LBlock(BlockRole.SHADOW);
+			case 'S' -> new SBlock(BlockRole.SHADOW);
+			case 'Z' -> new ZBlock(BlockRole.SHADOW);
+			case 'T' -> new TBlock(BlockRole.SHADOW);
+			default -> null;
+		};
+
+		assert shadowBlock != null;
+		shadowBlock.setRotation(block.getRotation());
+		shadowBlock.setBoxCorners(block.getBoxCorners());
+		shadowBlock.updateCoord();
+
+		while(true){
+			if (!shadowBlock.gravity()) break;
+		}
+
+		System.out.println("Shadow Generated.");
 	}
 	
 	public void paint(Graphics g) {
@@ -161,6 +182,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 		if(play && !gamePaused) {
 			//Block
 			block.draw((Graphics2D) g);
+			shadowBlock.draw((Graphics2D) g);
 			nextBlock.draw((Graphics2D) g);
 
 			if(!holdEmpty) {
@@ -256,7 +278,8 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 					level += 1;
 				}
 				
-				block = generateBlock(nextBlock, BlockRole.REGULAR);
+				block = generateBlock(nextBlock);
+				generateShadow();
 				nextBlock = generateBlock(BlockRole.NEXT);
 				holdUsed = false;
 			}
@@ -286,6 +309,9 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 		}
 		if(!play && !gameLost && !gamePaused && (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_ENTER)) {
 			play=true;
+			block = generateBlock(BlockRole.REGULAR);
+			generateShadow();
+			nextBlock = generateBlock(BlockRole.NEXT);
 			timer.start();
 			repaint();
 			return;
@@ -293,15 +319,17 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 		if(play) {
 			if(e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D) {
 				block.moveRight();
+				generateShadow();
 				repaint();
 				SoundManager.playSound(SoundType.MOVE);
 			}
 			else if(e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A) {
 				block.moveLeft();
+				generateShadow();
 				repaint();
 				SoundManager.playSound(SoundType.MOVE);
 			}
-			else if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+			else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
 				if(block.gravity()) {
 					timer.restart();
 					repaint();
@@ -309,29 +337,39 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 			}
 			else if(e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) {
 				block.rotateRight();
+				generateShadow();
 				repaint();
 				SoundManager.playSound(SoundType.ROTATE);
 			}
-			else if(e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
+			else if(e.getKeyCode() == KeyEvent.VK_Z || e.getKeyCode() == KeyEvent.VK_S) {
 				block.rotateLeft();
+				generateShadow();
 				repaint();
 				SoundManager.playSound(SoundType.ROTATE);
 			}
 			else if(e.getKeyCode() == KeyEvent.VK_C) {
 				if(holdEmpty) {
 					holdBlock = putOnHold(block);
-					block = generateBlock(nextBlock, BlockRole.REGULAR);
+					block = generateBlock(nextBlock);
+					generateShadow();
 					nextBlock = generateBlock(BlockRole.NEXT);
 					holdEmpty = false;
 				}
 				else if(!holdUsed){
 					BlockBox temp = holdBlock;
 					holdBlock = putOnHold(block);
-					block = generateBlock(temp, BlockRole.REGULAR);
+					block = generateBlock(temp);
+					generateShadow();
 					holdUsed = true;
 				}
 				repaint();
 				SoundManager.playSound(SoundType.ROTATE);
+			}
+			else if(e.getKeyCode() == KeyEvent.VK_SPACE){
+				block.hardDrop(shadowBlock);
+				this.actionPerformed(new ActionEvent(this, 0, ""));
+				timer.restart();
+				SoundManager.playSound(SoundType.DROP);
 			}
 		}
 		if(gameLost) {
@@ -341,6 +379,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 				
 				Board.setBoard(boardRows, boardCols, leftBorderWidth, topBorderHeight);
 				block = generateBlock(BlockRole.REGULAR);
+				generateShadow();
 				nextBlock = generateBlock(BlockRole.NEXT);
 				holdBlock = null;
 				holdEmpty = true;

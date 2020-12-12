@@ -18,7 +18,7 @@ public class OBlock extends BlockBox{
 		}
 		
 		coord = getCoord();
-		blockType = 'O';
+		blockType = blockRole == BlockRole.SHADOW ? 'o' : 'O';
 	}
 	
 	
@@ -42,15 +42,13 @@ public class OBlock extends BlockBox{
 			return false;
 		}
 		else {
-			for(int[] square: coord) {
-				square[0] += 1;
-			}
+			super.gravity();
 			return true;
 		}
 	}
 	
 	public void draw(Graphics2D g) {
-		g.setColor(BlockColors.getColor('O'));
+		g.setColor(BlockColors.getColor(blockType));
 		
 		if(blockRole == BlockRole.NEXT) {
 			for(int[] square: coord) {
@@ -122,12 +120,10 @@ public class OBlock extends BlockBox{
 		}
 	}
 	
-	public boolean rotateRight() {
-		return false;
+	public void rotateRight() {
 	}
 	
-	public boolean rotateLeft() {
-		return false;
+	public void rotateLeft() {
 	}
 	
 	public void moveRight() {
@@ -139,9 +135,7 @@ public class OBlock extends BlockBox{
 			return;
 		}
 		else {
-			for(int[] square: coord) {
-				square[1] += 1;
-			}
+			super.moveRight();
 		}
 	}
 	
@@ -154,16 +148,14 @@ public class OBlock extends BlockBox{
 			return;
 		}
 		else {
-			for(int[] square: coord) {
-				square[1] -= 1;
-			}
+			super.moveLeft();
 		}
 	}
 
 	public boolean reachedEnd() {
 		if(coord[2][0]+1 >= Board.board.length ||
-			Board.board[coord[2][0]+1][coord[2][1]] != 0 ||
-				Board.board[coord[3][0]+1][coord[3][1]] != 0)
+			(Board.board[coord[2][0]+1][coord[2][1]] != 0 && Board.board[coord[2][0]+1][coord[2][1]] < 91) ||
+				(Board.board[coord[3][0]+1][coord[3][1]] != 0 && Board.board[coord[3][0]+1][coord[3][1]] < 91))
 		{
 			return true;
 		}
@@ -172,12 +164,12 @@ public class OBlock extends BlockBox{
 
 	public void endMovement() {
 		if(coord[0][0] < 0) {
-			Board.modBoard(coord[2][0], coord[2][1], 'O');
-			Board.modBoard(coord[3][0], coord[3][1], 'O');
+			Board.modBoard(coord[2][0], coord[2][1], blockType);
+			Board.modBoard(coord[3][0], coord[3][1], blockType);
 		}
 		else {
 			for(int[] square: coord) {
-				Board.modBoard(square[0], square[1], 'O');
+				Board.modBoard(square[0], square[1], blockType);
 			}
 		}
 	}

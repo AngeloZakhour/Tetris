@@ -81,6 +81,18 @@ public class Board {
 	public static void draw(Graphics2D g){
 		draw(g, true);
 	}
+
+	public static void clearShadow(BlockBox bb){
+		if(bb.getBlockRole() != BlockRole.SHADOW) return;
+
+		int[][] coord = bb.getCoord();
+
+		for(int[] square : coord){
+			if(board[square[0]][square[1]] == bb.getBlockType()){
+				board[square[0]][square[1]] = 0;
+			}
+		}
+	}
 	
 	
 
