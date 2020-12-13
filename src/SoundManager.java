@@ -28,7 +28,8 @@ public class SoundManager {
         if(mute) return;
 
         try{
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(sounds.get(type)).getAbsoluteFile());
+            AudioInputStream audioInputStream =
+                    AudioSystem.getAudioInputStream(new File(sounds.get(type)).getAbsoluteFile());
             Clip clip = AudioSystem.getClip();
             clip.open(audioInputStream);
 
@@ -52,7 +53,8 @@ public class SoundManager {
                 soundtrackClip.stop();
             }
             SoundType type = SoundType.SOUNDTRACK;
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(sounds.get(type)).getAbsoluteFile());
+            AudioInputStream audioInputStream =
+                    AudioSystem.getAudioInputStream(new File(sounds.get(type)).getAbsoluteFile());
             soundtrackClip = AudioSystem.getClip();
             soundtrackClip.open(audioInputStream);
 
@@ -109,6 +111,7 @@ public class SoundManager {
 
     public static void resumeMusic(){
         soundtrackClip.setMicrosecondPosition(clipTime);
+        soundtrackClip.loop(Clip.LOOP_CONTINUOUSLY);
         soundtrackClip.start();
     }
 

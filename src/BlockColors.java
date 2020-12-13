@@ -13,7 +13,7 @@ public class BlockColors {
         colors.put('J', new Color(0, 107, 182));
         colors.put('L', new Color(213, 117, 7));
         colors.put('S', new Color(119, 185, 10));
-        colors.put('Z', new Color(181, 10, 19));
+        colors.put('Z', new Color(219, 29, 39));
         colors.put('T', new Color(169, 15, 201));
 
         Object[] keys = colors.keySet().toArray();

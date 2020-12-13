@@ -1,7 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public class SoundDisplay {
 
@@ -11,14 +9,18 @@ public class SoundDisplay {
 
     //Positioning different elements
     // -Icon
-    private static final int soundIconXPos = 10;
-    private static final int soundIconYPos = Main.frameHeight-110;
-    private static final int soundIconSize = soundOn.getIconWidth(); //its a square
+    private static int soundIconXPos;
+    private static int soundIconYPos;
+    private static int soundIconSize; //its a square
     // -Bar
-    private static final int soundBarXPos = soundIconXPos + soundIconSize + 10;
-    private static final int soundBarYPos = soundIconYPos;
-    private static final int soundBarWidth = 135;
-    private static final int soundBarHeight = soundIconSize;
+    private static int soundBarXPos;
+    private static int soundBarYPos;
+    private static int soundBarWidth;
+    private static int soundBarHeight;
+
+    static {
+        setPositions(0, 0, 150, 0);
+    }
 
     public static void draw(JPanel caller, Graphics2D g){
         if(mute) soundMute.paintIcon(caller, g, soundIconXPos, soundIconYPos);
@@ -35,7 +37,6 @@ public class SoundDisplay {
         boolean redraw = false;
         double x = point.getX();
         double y = point.getY();
-        System.out.println(x + " / " + y);
 
         boolean onButtonY = y >= soundIconYPos && y <= soundIconYPos+soundIconSize;
         boolean onButtonX = x >= soundIconXPos && x <= soundIconXPos+soundIconSize;
@@ -55,6 +56,20 @@ public class SoundDisplay {
 
         return redraw;
     }
+
+   public static void setPositions(int x, int y, int width, int xPadding){
+
+       // -Icon
+       soundIconXPos = x+xPadding;
+       soundIconYPos = y;
+       soundIconSize = soundOn.getIconWidth(); //its a square
+       // -Bar
+       soundBarXPos = soundIconXPos + soundIconSize + 10;
+       soundBarYPos = soundIconYPos;
+       soundBarWidth = width - (2*xPadding) - (soundBarXPos-soundIconXPos);
+       soundBarHeight = soundIconSize;
+
+   }
 
     private static int getVolumeBarSize(){
         return (int)(soundBarWidth*(SoundManager.getVolume()/SoundManager.getMaxVolume()));

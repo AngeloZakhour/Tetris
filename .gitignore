@@ -1,0 +1,5 @@
+#Files and directories to be ignored by git
+/out/
+/.idea/
+/*.iml
+/*.class

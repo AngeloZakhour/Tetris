@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.*;
 
@@ -8,8 +9,8 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
 	//Scores
 	private int score = 0;
-	private final int pointsPerLevel = 2500;
-	private int pointsToNextLevel = pointsPerLevel;
+	private final int blocksPerLevel = 20;
+	private int blocksToNextLevel = blocksPerLevel;
 	private int level = 1;
 	private int lines = 0;
 	
@@ -65,6 +66,39 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 	int scaledBgHeight = Math.toIntExact(Math.round(bg.getIconHeight()*1.22));
 	private final ImageIcon scaledBg =
 			new ImageIcon(bg.getImage().getScaledInstance(scaledBgWidth, scaledBgHeight, Image.SCALE_SMOOTH));
+
+	//Fonts
+	private final Font playFont = new Font("Rockwell", Font.PLAIN, 25);
+	private final Font pauseFont = new Font("Rockwell", Font.PLAIN, 35);
+	private final Font pauseSubFont = new Font("Rockwell", Font.PLAIN, 15);
+	private final Font instructionFont = new Font("Rockwell", Font.PLAIN, 17);
+	private final Font instructionCmdFont = new Font("Rockwell", Font.PLAIN, 16);
+	private final Font volumeFont = new Font("Rockwell", Font.PLAIN, 27);
+
+	//List of instructions
+	private final String[] instructionList =
+			{"MOVE RIGHT", "MOVE LEFT", "ROTATE RIGHT", "ROTATE LEFT", "SOFT DROP", "HARD DROP", "HOLD"};
+	private final String[] commandList =
+			{"RIGHT ARROW / D", "LEFT ARROW / A", "UP ARROW / W", "Z", "DOWN ARROW / S", "SPACE", "C"};
+
+	//Text Positioning (GAME PAUSED / INSTRUCTIONS)
+	private final int pausedTextX =  leftBorderWidth + 25;
+	private final int pausedTextY = topBorderHeight +  (blockSize * 2);
+	private final int instructionX = leftBorderWidth + 10;
+	private final int firstInstructionY = topBorderHeight + blockSize * 4;
+	private final int instructionYIncrement = blockSize;
+	private final int commandX = instructionX + 140;
+	private final int lastInstructionY = firstInstructionY + instructionList.length*instructionYIncrement;
+	private final int volumeX = leftBorderWidth + 90;
+	private int volumeY = lastInstructionY+blockSize;
+
+	//Leaderboard
+	private final int leadersShown = 10;
+	private ArrayList<String> leaderboard = null;
+	private final ArrayList<String> leaderboardNames = new ArrayList<>();
+	private final ArrayList<String> leaderboardScores = new ArrayList<>();
+	private String username = "-";
+	private final int lastLeaderY = firstInstructionY + leadersShown*instructionYIncrement;
 
 	//Sound
 	static{
@@ -147,8 +181,6 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 		while(true){
 			if (!shadowBlock.gravity()) break;
 		}
-
-		System.out.println("Shadow Generated.");
 	}
 	
 	public void paint(Graphics g) {
@@ -158,14 +190,11 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 		//Title
 		scaledLogo.paintIcon(this, g, leftBorderWidth, 0);
 
-		//Sound
-		SoundDisplay.draw(this, (Graphics2D) g);
-
 		//Next block / Hold block
 		g.setColor(Color.WHITE);
 		g.drawRect(nextBlockXStart, nextBlockYStart, 5*blockSize, 4*blockSize);
 		g.drawRect(holdBlockXStart, holdBlockYStart, 5*blockSize, 4*blockSize);
-		g.setFont(new Font("Arial", Font.BOLD, 25));
+		g.setFont(playFont);
 		g.drawString("Up Next", nextBlockXStart+blockSize, topBorderHeight+blockSize);
 		g.drawString("Hold", (int) (holdBlockXStart+1.5*blockSize), topBorderHeight+blockSize);
 		g.setColor(new Color(181, 181, 181, 30));
@@ -174,7 +203,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
 		//Score
 		g.setColor(Color.white);
-		g.setFont(new Font("Arial", Font.BOLD, 25));
+		g.setFont(playFont);
 		g.drawString("Score: "+score, rightBorderXStart+23, topBorderHeight+7*blockSize);
 		g.drawString("Level: "+level, rightBorderXStart+23, topBorderHeight+8*blockSize);
 		g.drawString("Lines: "+lines, rightBorderXStart+23, topBorderHeight+9*blockSize);
@@ -194,49 +223,97 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 			return;
 		}
 		
-		
-		//Game paused
-		if(gamePaused) {
-			Board.draw((Graphics2D) g, false);
-			g.setColor(new Color(60, 60, 60, 100));
-			g.fillRect(leftBorderWidth, topBorderHeight, boardCols*blockSize, boardRows*blockSize);
-			g.fillRect(nextBlockXStart, nextBlockYStart, 5*30, 4*30);
-			g.fillRect(holdBlockXStart, holdBlockYStart, 5*30, 4*30);
-			
+		if(!play) {
+			//Border of board
 			g.setColor(Color.WHITE);
-			g.setFont(new Font("Arial", Font.BOLD, 35));
-			g.drawString(
-					"GAME PAUSED",
-					leftBorderWidth+25,
-					((bottomBorderYStart-topBorderHeight)/2)+topBorderHeight
-			);
+			g.drawRect(leftBorderWidth, topBorderHeight, boardCols * blockSize, boardRows * blockSize);
 
+			//Board, hold, and next covers
+			g.setColor(new Color(60, 60, 60, 150));
+			g.fillRect(leftBorderWidth + 1, topBorderHeight + 1, boardCols * blockSize - 1, boardRows * blockSize - 1);
+			g.fillRect(nextBlockXStart + 1, nextBlockYStart + 1, 5 * 30 - 1, 4 * 30 - 1);
+			g.fillRect(holdBlockXStart + 1, holdBlockYStart + 1, 5 * 30 - 1, 4 * 30 - 1);
 
-			return;
-		}
+			g.setColor(Color.WHITE);
+			g.setFont(pauseFont);
 
-		Board.draw((Graphics2D) g);
+			//Game paused
+			if (!gameLost) {
 
+				if (gamePaused) {
+					g.drawString(
+							"GAME PAUSED",
+							pausedTextX,
+							pausedTextY
+					);
+				} else {
+					g.drawString(
+							"INSTRUCTIONS",
+							pausedTextX,
+							pausedTextY
+					);
+				}
 
-		//Game over
-		if(gameLost) {
-			g.setColor(new Color(60, 60, 60, 200));
-			g.fillRect(leftBorderWidth, topBorderHeight, boardCols*blockSize, boardRows*blockSize);
-			
-			g.setColor(new Color(230, 0, 0));
-			g.setFont(new Font("Arial", Font.BOLD, 35));
-			g.drawString(
-					"GAME OVER!",
-					leftBorderWidth + blockSize + blockSize/2,
-					((bottomBorderYStart-topBorderHeight)/2)+topBorderHeight
-			);
-			
-			g.setFont(new Font("Arial", Font.BOLD, 15));
-			g.drawString(
-					"Press ENTER to Restart",
-					leftBorderWidth+2*blockSize,
-					((bottomBorderYStart-topBorderHeight)/2)+topBorderHeight+blockSize
-			);
+				g.setFont(instructionFont);
+				int instructions = 0;
+				//Controls Types
+				for (String s : instructionList) {
+					g.drawString(s, instructionX, firstInstructionY + (instructionYIncrement * instructions++));
+				}
+
+				//Commands
+				g.setFont(instructionCmdFont);
+				instructions = 0;
+				for (String s : commandList) {
+					g.drawString(s, commandX, firstInstructionY + (instructionYIncrement * instructions++));
+				}
+
+				volumeY = lastInstructionY+blockSize;
+			}
+
+			//Game over
+			else {
+				g.drawString(
+						"Leaderboard",
+						pausedTextX+20,
+						pausedTextY
+				);
+
+				g.setFont(instructionFont);
+				for(int i=0; i<leadersShown && i<leaderboard.size(); i++){
+					g.drawString(i+1 + ": " + leaderboardNames.get(i), instructionX, firstInstructionY+(instructionYIncrement*i));
+				}
+
+				g.setFont(instructionCmdFont);
+				for(int i=0; i<leadersShown && i<leaderboard.size(); i++){
+					g.drawString(leaderboardScores.get(i), commandX + 60, firstInstructionY+(instructionYIncrement*i));
+				}
+
+				if(leaderboard.size() < leadersShown){
+					g.setFont(instructionFont);
+					for(int i=leaderboard.size(); i < leadersShown; i++){
+						g.drawString(i+1 + ": EMPTY" , instructionX, firstInstructionY+(instructionYIncrement*i));
+					}
+					g.setFont(instructionCmdFont);
+					for(int i=leaderboard.size(); i < leadersShown; i++){
+						g.drawString("N/A", commandX + 60, firstInstructionY+(instructionYIncrement*i));
+					}
+				}
+				g.setFont(pauseSubFont);
+				g.drawString(
+						"Press ENTER to Restart",
+						leftBorderWidth + 2 * blockSize+10,
+						topBorderHeight+blockSize*19
+				);
+
+				volumeY = lastLeaderY+blockSize;
+			}
+
+			//Sound
+			g.setFont(volumeFont);
+			g.drawString("VOLUME", volumeX, volumeY);
+			SoundDisplay.setPositions(leftBorderWidth, volumeY+blockSize, blockSize*10, 25);
+			SoundDisplay.draw(this, (Graphics2D) g);
 		}
 	}
 	
@@ -245,6 +322,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 		if(play) {
 			if(block.reachedEnd()) {
 				block.endMovement();
+				blockPlaced();
 				if(Board.gameLost()) {
 					play = false;
 					gameLost = true;
@@ -252,30 +330,20 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 				}
 				int ctr = block.checkRows();
 				if(ctr == 1) {
-					score += 100;
-					pointsToNextLevel -= 100;
+					addPoints(100);
 					lines += 1;
 				}
 				else if (ctr == 2) {
-					score += 250;
-					pointsToNextLevel -= 250;
+					addPoints(250);
 					lines += 2;
 				}
 				else if(ctr == 3) {
-					score += 750;
-					pointsToNextLevel -= 750;
+					addPoints(750);
 					lines += 3;
 				}
 				else if(ctr == 4) {
-					score += 2000;
-					pointsToNextLevel -= 2000;
+					addPoints(2000);
 					lines += 4;
-				}
-				if(pointsToNextLevel <= 0) {
-					pointsToNextLevel = pointsPerLevel-score%pointsPerLevel;
-					delay -= delayIncrement;
-					timer.setDelay(delay);
-					level += 1;
 				}
 				
 				block = generateBlock(nextBlock);
@@ -288,27 +356,28 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 			repaint();
 		}
 		else if(gameLost) {
-			repaint();
+			timer.stop();
+			new EnterNameFrame(this).setVisible(true);
 		}
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_ESCAPE && !gameLost) {
-			if(play) {
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE && ((play && !gamePaused) || (!play && gamePaused))) {
+			if (play) {
 				play = false;
 				gamePaused = true;
 				SoundManager.pauseMusic();
-			}
-			else {
+			} else {
 				play = true;
 				gamePaused = false;
 				SoundManager.resumeMusic();
 			}
 			repaint();
 		}
-		if(!play && !gameLost && !gamePaused && (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_ENTER)) {
-			play=true;
+		if (!play && !gameLost && !gamePaused &&
+				(e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_ENTER)) {
+			play = true;
 			block = generateBlock(BlockRole.REGULAR);
 			generateShadow();
 			nextBlock = generateBlock(BlockRole.NEXT);
@@ -316,46 +385,40 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 			repaint();
 			return;
 		}
-		if(play) {
-			if(e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D) {
+		if (play) {
+			if (e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D) {
 				block.moveRight();
 				generateShadow();
 				repaint();
 				SoundManager.playSound(SoundType.MOVE);
-			}
-			else if(e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A) {
+			} else if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A) {
 				block.moveLeft();
 				generateShadow();
 				repaint();
 				SoundManager.playSound(SoundType.MOVE);
-			}
-			else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
-				if(block.gravity()) {
+			} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+				if (block.gravity()) {
 					timer.restart();
 					repaint();
 				}
-			}
-			else if(e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) {
+			} else if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) {
 				block.rotateRight();
 				generateShadow();
 				repaint();
 				SoundManager.playSound(SoundType.ROTATE);
-			}
-			else if(e.getKeyCode() == KeyEvent.VK_Z || e.getKeyCode() == KeyEvent.VK_S) {
+			} else if (e.getKeyCode() == KeyEvent.VK_Z || e.getKeyCode() == KeyEvent.VK_S) {
 				block.rotateLeft();
 				generateShadow();
 				repaint();
 				SoundManager.playSound(SoundType.ROTATE);
-			}
-			else if(e.getKeyCode() == KeyEvent.VK_C) {
-				if(holdEmpty) {
+			} else if (e.getKeyCode() == KeyEvent.VK_C) {
+				if (holdEmpty) {
 					holdBlock = putOnHold(block);
 					block = generateBlock(nextBlock);
 					generateShadow();
 					nextBlock = generateBlock(BlockRole.NEXT);
 					holdEmpty = false;
-				}
-				else if(!holdUsed){
+				} else if (!holdUsed) {
 					BlockBox temp = holdBlock;
 					holdBlock = putOnHold(block);
 					block = generateBlock(temp);
@@ -364,19 +427,18 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 				}
 				repaint();
 				SoundManager.playSound(SoundType.ROTATE);
-			}
-			else if(e.getKeyCode() == KeyEvent.VK_SPACE){
+			} else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
 				block.hardDrop(shadowBlock);
 				this.actionPerformed(new ActionEvent(this, 0, ""));
 				timer.restart();
 				SoundManager.playSound(SoundType.DROP);
 			}
 		}
-		if(gameLost) {
-			if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+		if (gameLost) {
+			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 				gameLost = false;
 				play = true;
-				
+
 				Board.setBoard(boardRows, boardCols, leftBorderWidth, topBorderHeight);
 				block = generateBlock(BlockRole.REGULAR);
 				generateShadow();
@@ -394,29 +456,67 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 			}
 		}
 
-		if(e.getKeyCode() == KeyEvent.VK_PLUS || e.getKeyCode() == KeyEvent.VK_EQUALS){
+		if (e.getKeyCode() == KeyEvent.VK_PLUS || e.getKeyCode() == KeyEvent.VK_EQUALS) {
 			SoundManager.increaseVolume();
 			repaint();
 		}
 
-		if(e.getKeyCode() == KeyEvent.VK_MINUS){
+		if (e.getKeyCode() == KeyEvent.VK_MINUS) {
 			SoundManager.decreaseVolume();
 			repaint();
 		}
-		
+
+	}
+
+	private void addPoints(int points){
+		score += points;
+	}
+
+	private void blockPlaced(){
+		blocksToNextLevel--;
+		addPoints(12);
+		if(blocksToNextLevel == 0){
+			blocksToNextLevel = blocksPerLevel;
+			delay -= delayIncrement;
+			timer.setDelay(delay);
+			level += 1;
+		}
 	}
 
 	private void addMouseListener(){
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(SoundDisplay.mouseClicked(getMousePosition())){
-					repaint();
+				if(!play) {
+					if (SoundDisplay.mouseClicked(getMousePosition())) {
+						repaint();
+					}
 				}
 			}
 		});
 	}
-		
+
+	public void setUsername(String name){
+		this.username = name;
+	}
+
+	public void showLeaderboard(){
+		leaderboard = LeaderboardManager.addScore(username, score);
+		String[] leader;
+		for(String s : leaderboard){
+			leader = s.split(":");
+			if(leader[0].length() > 15){
+				leader[0] = leader[0].substring(0, 15);
+			}
+			leaderboardNames.add(leader[0]);
+			leaderboardScores.add(leader[1]);
+		}
+		repaint();
+	}
+
+	public int getScore(){
+		return score;
+	}
 	@Override
 	public void keyTyped(KeyEvent e) {}
 
