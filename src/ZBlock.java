@@ -69,7 +69,7 @@ public class ZBlock extends BlockBox{
 	}
 	
 	public void draw(Graphics2D g) {
-		g.setColor(BlockColors.getColor('Z'));
+		g.setColor(BlockColors.getColor(blockType));
 		
 		if(blockRole == BlockRole.NEXT) {
 			for(int[] square: coord) {
