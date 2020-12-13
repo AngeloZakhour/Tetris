@@ -450,8 +450,8 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 				score = 0;
 				level = 1;
 				lines = 0;
-				timer.stop();
 				timer = new Timer(initialDelay, this);
+				timer.start();
 				repaint();
 			}
 		}
@@ -503,6 +503,8 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 	public void showLeaderboard(){
 		leaderboard = LeaderboardManager.addScore(username, score);
 		String[] leader;
+		leaderboardNames.clear();
+		leaderboardScores.clear();
 		for(String s : leaderboard){
 			leader = s.split(":");
 			if(leader[0].length() > 15){
