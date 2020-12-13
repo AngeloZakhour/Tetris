@@ -12,7 +12,7 @@ public class EnterNameFrame extends JFrame{
     //Bounds variables
     private static final int x = 300;
     private static final int y = 200;
-    private static final int width = 300;
+    private static final int width = 400;
     private static final int height = 250;
 
     public EnterNameFrame(Gameplay caller){
@@ -35,7 +35,7 @@ public class EnterNameFrame extends JFrame{
         confirmButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                caller.setUsername(nameField.getText());
+                caller.setUsername(nameField.getText().toUpperCase());
                 caller.showLeaderboard();
                 self.setVisible(false);
             }
