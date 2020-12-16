@@ -46,7 +46,6 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 	// Timer
 	Timer timer;
 	private final int initialDelay = 750;
-	private final int delayIncrement = 50;
 	private int delay = initialDelay;
 	
 	// Board
@@ -54,14 +53,14 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 	private final int boardCols = 10;
 	
 	//Logo
-	private final ImageIcon logo = new ImageIcon("src/images/tetris-logo.png");
+	private final ImageIcon logo = new ImageIcon("assets/images/tetris-logo.png");
 	private final int scaledWidth = Math.toIntExact(Math.round(logo.getIconWidth()/1.17))-1;
 	private final int scaledHeight = Math.toIntExact(Math.round(logo.getIconHeight()/1.17));
 	private final ImageIcon scaledLogo =
 			new ImageIcon(logo.getImage().getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH));
 
 	//Background
-	private final ImageIcon bg = new ImageIcon("src/images/bg.png");
+	private final ImageIcon bg = new ImageIcon("assets/images/bg.png");
 	int scaledBgWidth = Math.toIntExact(Math.round(bg.getIconWidth()*1.22));
 	int scaledBgHeight = Math.toIntExact(Math.round(bg.getIconHeight()*1.22));
 	private final ImageIcon scaledBg =
@@ -477,6 +476,21 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 		addPoints(12);
 		if(blocksToNextLevel == 0){
 			blocksToNextLevel = blocksPerLevel;
+			int delayIncrement;
+
+			if(delay>500){
+				delayIncrement = 50;
+			}
+			else if(delay > 300){
+				delayIncrement = 25;
+			}
+			else if(delay > 100){
+				delayIncrement = 15;
+			}
+			else{
+				delayIncrement=0;
+			}
+
 			delay -= delayIncrement;
 			timer.setDelay(delay);
 			level += 1;

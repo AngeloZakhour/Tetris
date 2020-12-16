@@ -18,10 +18,10 @@ public class SoundManager {
     private static final float SOUND_INCREMENT = 0.01f;
 
     static{
-        sounds.put(SoundType.SOUNDTRACK, "src/sounds/tetris-soundtrack.wav");
-        sounds.put(SoundType.MOVE, "src/sounds/moveBlock.wav");
-        sounds.put(SoundType.ROTATE, "src/sounds/rotateBlock.wav");
-        sounds.put(SoundType.DROP, "src/sounds/dropBlock.wav");
+        sounds.put(SoundType.SOUNDTRACK, "assets/sounds/tetris-soundtrack.wav");
+        sounds.put(SoundType.MOVE, "assets/sounds/moveBlock.wav");
+        sounds.put(SoundType.ROTATE, "assets/sounds/rotateBlock.wav");
+        sounds.put(SoundType.DROP, "assets/sounds/dropBlock.wav");
     }
 
     public static void playSound(SoundType type){

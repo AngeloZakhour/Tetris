@@ -3,8 +3,8 @@ import java.awt.*;
 
 public class SoundDisplay {
 
-    private static final ImageIcon soundOn = new ImageIcon("src/images/volume.png");
-    private static final ImageIcon soundMute = new ImageIcon("src/images/mute.png");
+    private static final ImageIcon soundOn = new ImageIcon("assets/images/volume.png");
+    private static final ImageIcon soundMute = new ImageIcon("assets/images/mute.png");
     private static boolean mute = false;
 
     //Positioning different elements
